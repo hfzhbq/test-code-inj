@@ -34,6 +34,8 @@
         <terminal-type>0</terminal-type>
         <remove-instrumentation>0</remove-instrumentation>
         <environment>
+          <variable name="LD_PRELOAD"
+                    value="/root/NetBeansProjects/injection-so/dist/Debug/GNU-Linux/libinjection-so.so"/>
         </environment>
       </runprofile>
     </conf>

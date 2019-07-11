@@ -1,47 +1,42 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * File:   main.c
- * Author: root
- *
- * Created on March 9, 2019, 7:29 PM
- */
-
-//LD_PRELOAD=./libinjection-so.so ./test
-
-#include <fcntl.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <stdlib.h>
+#include <memory.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#define PORT 9090
+#define Buflen 1024
+#define SERVER_ADDR "127.0.0.1"
+int main(int argc,char *argv[])
+{
+    struct sockaddr_in server_addr;
+    int n,count=0;
+    int sockfd;
+    char sendline[Buflen];
+    sockfd= socket(AF_INET,SOCK_STREAM,0);
+    memset(&server_addr,0,sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(PORT);
 
-#define TESTFILE "./temp"
-
-#undef DEBUG_INJ
-/*
- *
- */
-int main(int argc, char** argv) {
-
-#ifdef DEBUG_INJ
-    int a = 1;
-    while (a) {
-        sleep(1);
+    if (inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr) <= 0) {
+        printf("inet_pton error");
+        return 1;
     }
-#endif
 
-    int fd;
-    int nwrite;
-    char buff[1024]="hello hongbq";
-    char buff1[1024]="hello again\n";
-    fd = open(TESTFILE, O_CREAT | O_RDWR, 0644);
-    nwrite = write(fd, buff, strlen(buff));
-    nwrite = write(fd, buff1, strlen(buff1));
-    close(fd);
+    connect(sockfd,(struct sockaddr *)&server_addr,sizeof(server_addr));
 
-    return (EXIT_SUCCESS);
+    memset(sendline,'a',sizeof(Buflen));
+
+    while ( (n=send(sockfd,sendline,Buflen, NULL))>0 )
+    {
+      count++;
+      printf("already write %d bytes -- %d\n",n,count);
+    }
+
+    if(n<0)
+       perror("write error");
+    close(sockfd);
 }
-
